@@ -1,8 +1,12 @@
 package it.polito.tdp.artsmia;
 
 import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.artsmia.model.ArtObject;
+import it.polito.tdp.artsmia.model.ArtObjectPeso;
 import it.polito.tdp.artsmia.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -22,7 +26,7 @@ public class FXMLController {
     private URL location;
 
     @FXML
-    private ChoiceBox<?> boxLUN;
+    private ChoiceBox<Integer> boxLUN;
 
     @FXML
     private Button btnCalcolaComponenteConnessa;
@@ -41,16 +45,70 @@ public class FXMLController {
 
     @FXML
     void doAnalizzaOggetti(ActionEvent event) {
+    	
+    	txtResult.clear();
+    	this.model.creaGrafo();
+    	txtResult.appendText(this.model.creaSoluzione());
 
     }
 
     @FXML
     void doCalcolaComponenteConnessa(ActionEvent event) {
-
+    	
+    	int id;
+    	try {
+    		id=Integer.parseInt(this.txtObjectId.getText());
+    		
+    	}catch(NumberFormatException e) {
+    		txtResult.appendText("SCRIVI UN NUMERO INTERO");
+    		return;
+    	}
+    	
+    	if(this.model.verificaObj(id)==false)
+    	{
+    		txtResult.appendText("NON ESSITE NESSUN OGGETTO CON QUESTO ID");
+    		return;
+    	}
+    	
+    	this.txtResult.clear();
+    	int vicini=this.model.calcolaComponenteConnessa(Integer.parseInt(this.txtObjectId.getText()));
+    	this.txtResult.appendText("VERTICE "+id+" CONNESSO A "+vicini+" OBJECTS \n");
+    	for(int i=2; i<=vicini; i++)
+    	this.boxLUN.getItems().add(i);
     }
 
     @FXML
     void doCercaOggetti(ActionEvent event) {
+    	
+    	if(this.boxLUN.getValue()==null) {
+    		this.txtResult.appendText("Seleziona un numero dalla tendina!!");
+    		return;
+    	}
+    	int id;
+    	try {
+    		id=Integer.parseInt(this.txtObjectId.getText());
+    		
+    	}catch(NumberFormatException e) {
+    		txtResult.appendText("SCRIVI UN NUMERO INTERO");
+    		return;
+    	}
+    	
+    	if(this.model.verificaObj(id)==false)
+    	{
+    		txtResult.appendText("NON ESSITE NESSUN OGGETTO CON QUESTO ID");
+    		return;
+    	}
+    	
+    	
+    	
+    	this.model.cercaOttimo(this.boxLUN.getValue(), Integer.parseInt(this.txtObjectId.getText()));
+    	this.txtResult.appendText("BEST PESO TROVATO: "+this.model.getBest()+"\n");
+    	
+    	for(ArtObjectPeso a: this.model.getCamminoOttimo()) {
+    		this.txtResult.appendText(""+a.getA().getName()+ " "+a.getPeso()+"\n");
+    	}
+    	
+    	
 
     }
 
